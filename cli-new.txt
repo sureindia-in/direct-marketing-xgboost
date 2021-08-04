@@ -1,0 +1,35 @@
+
+Deploying Machine Learning Models with mlflow and Amazon SageMaker
+https://julsimon.medium.com/deploying-machine-learning-models-with-mlflow-and-amazon-sagemaker-dac2b8244224
+https://gitlab.com/juliensimon/sagemaker-automation/-/tree/master/mlflow/direct-marketing-xgboost
+https://www.youtube.com/watch?v=jpZSp9O8_ew
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+APP_NAME=mlflow-xgb-demo
+MODEL_PATH=D:\DataSets and GitHub\direct-marketing-xgboost\mlruns\1\2c14fe6785a8417c883f526b907d1c49\artifacts\direct-marketing-xgboost-model
+LOCAL_PORT=8888
+REGION=us-east-2
+ROLE=arn:aws:iam::794352754851:role/service-role/AmazonSageMaker-ExecutionRole-20210130T191900
+
+
+
+---mlflow sagemaker run-local -m "D\:\\DataSets\ and\ GitHub\\direct-marketing-xgboost\\mlruns\\1\\2c14fe6785a8417c883f526b907d1c49\\artifacts\\direct-marketing-xgboost-model" -p 8888
+mlflow sagemaker run-local -m "mlruns\\1\\2c14fe6785a8417c883f526b907d1c49\\artifacts\\direct-marketing-xgboost-model" -p 8888
+
+
+mlflow sagemaker build-and-push-container
+
+aws ecr describe-images --repository-name mlflow-pyfunc --region $REGION
+
+mlflow sagemaker deploy -a $APP_NAME -m $MODEL_PATH -e $ROLE --region-name $REGION
+
+aws sagemaker list-endpoints --region $REGION
+
+mlflow sagemaker delete -a $APP_NAME -r $REGION
+
+
+mlflow sagemaker run-local -m "mlruns\\1\\2c14fe6785a8417c883f526b907d1c49\\artifacts\\direct-marketing-xgboost-model" -p 8888
+mlflow sagemaker deploy -a mlflow-xgb-demo -m "mlruns\\1\\2c14fe6785a8417c883f526b907d1c49\\artifacts\\direct-marketing-xgboost-model" -e ""arn:aws:iam::794352754851:role/service-role/AmazonSageMaker-ExecutionRole-20210130T191900 --region-name us-east-2
+mlflow sagemaker delete -a mlflow-xgb-demo -r us-east-1
